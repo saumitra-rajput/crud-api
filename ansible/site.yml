@@ -1,0 +1,11 @@
+---
+- hosts: devops
+  become: yes
+
+  roles:
+    - common
+    - docker
+    - nodejs
+    - pm2
+    - nginx
+    - jenkins

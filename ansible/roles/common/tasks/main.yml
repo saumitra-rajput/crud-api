@@ -1,0 +1,22 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+
+- name: Upgrade packages
+  apt:
+    upgrade: dist
+
+- name: Install common packages
+  apt:
+    name:
+      - git
+      - curl
+      - unzip
+      - wget
+      - vim
+      - htop
+      - ca-certificates
+      - software-properties-common
+      - gnupg
+    state: present
