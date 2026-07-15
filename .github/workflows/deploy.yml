@@ -27,6 +27,7 @@ jobs:
             docker build -t crud-api .
 
             docker stop crud-api || true
+
             docker rm crud-api || true
 
             docker run -d \
