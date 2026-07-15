@@ -1,0 +1,37 @@
+name: Deploy CRUD API
+
+on: 
+  push:
+    branch:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout repo code
+        uses: actions/checkout@v4
+      
+      - name: deploy to EC2
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/crud-api
+            
+            git pull origin main
+
+            docker build -t crud-api .
+
+            docker stop crud-api || true
+            docker rm crud-api || true
+
+            docker run -d \
+              --name crud-api \
+              --restart unless-stopped \
+              --env-file .env \
+              -p 3000:3000 \
+              crud-api
