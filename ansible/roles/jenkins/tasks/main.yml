@@ -1,18 +1,29 @@
 ---
 - name: Install Java
   apt:
-    name: openjdk-21-jdk
+    name:
+      - fontconfig
+      - openjdk-21-jre
     state: present
+    update_cache: yes
 
-- name: Add Jenkins key
+- name: Create keyrings directory
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
+- name: Download Jenkins GPG key
   shell: |
-    curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | tee /usr/share/keyrings/jenkins-keyring.asc >/dev/null
+    curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | tee /etc/apt/keyrings/jenkins-keyring.asc > /dev/null
 
 - name: Add Jenkins repository
-  shell: |
-    echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/" | tee /etc/apt/sources.list.d/jenkins.list
+  copy:
+    dest: /etc/apt/sources.list.d/jenkins.list
+    content: |
+      deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/
 
-- name: Update apt
+- name: Update apt cache
   apt:
     update_cache: yes
 
@@ -21,14 +32,8 @@
     name: jenkins
     state: present
 
-- name: Change Jenkins port to 9090
-  lineinfile:
-    path: /etc/default/jenkins
-    regexp: "^HTTP_PORT="
-    line: "HTTP_PORT=9090"
-
-- name: Restart Jenkins
-  service:
+- name: Enable Jenkins
+  systemd:
     name: jenkins
     enabled: yes
-    state: restarted
+    state: started
